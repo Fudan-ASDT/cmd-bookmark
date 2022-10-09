@@ -1,4 +1,4 @@
-// Generated from src/grammar/md.g4 by ANTLR 4.9.0-SNAPSHOT
+// Generated from src/grammar/mdParser.g4 by ANTLR 4.9.0-SNAPSHOT
 
 
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
@@ -6,6 +6,7 @@ import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 import { DomainNameOrIPv4HostContext } from "./mdParser";
 import { IPv6HostContext } from "./mdParser";
 import { MdContext } from "./mdParser";
+import { MdItemContext } from "./mdParser";
 import { TitleContext } from "./mdParser";
 import { LinkContext } from "./mdParser";
 import { UrlContext } from "./mdParser";
@@ -32,7 +33,7 @@ import { StringContext } from "./mdParser";
  * @param <Result> The return type of the visit operation. Use `void` for
  * operations with no return type.
  */
-export interface mdVisitor<Result> extends ParseTreeVisitor<Result> {
+export interface mdParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	/**
 	 * Visit a parse tree produced by the `DomainNameOrIPv4Host`
 	 * labeled alternative in `mdParser.hostname`.
@@ -55,6 +56,13 @@ export interface mdVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitMd?: (ctx: MdContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `mdParser.mdItem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitMdItem?: (ctx: MdItemContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `mdParser.title`.

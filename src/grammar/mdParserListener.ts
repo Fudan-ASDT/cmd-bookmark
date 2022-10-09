@@ -1,4 +1,4 @@
-// Generated from src/grammar/md.g4 by ANTLR 4.9.0-SNAPSHOT
+// Generated from src/grammar/mdParser.g4 by ANTLR 4.9.0-SNAPSHOT
 
 
 import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
@@ -6,6 +6,7 @@ import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 import { DomainNameOrIPv4HostContext } from "./mdParser";
 import { IPv6HostContext } from "./mdParser";
 import { MdContext } from "./mdParser";
+import { MdItemContext } from "./mdParser";
 import { TitleContext } from "./mdParser";
 import { LinkContext } from "./mdParser";
 import { UrlContext } from "./mdParser";
@@ -29,7 +30,7 @@ import { StringContext } from "./mdParser";
  * This interface defines a complete listener for a parse tree produced by
  * `mdParser`.
  */
-export interface mdListener extends ParseTreeListener {
+export interface mdParserListener extends ParseTreeListener {
 	/**
 	 * Enter a parse tree produced by the `DomainNameOrIPv4Host`
 	 * labeled alternative in `mdParser.hostname`.
@@ -66,6 +67,17 @@ export interface mdListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitMd?: (ctx: MdContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `mdParser.mdItem`.
+	 * @param ctx the parse tree
+	 */
+	enterMdItem?: (ctx: MdItemContext) => void;
+	/**
+	 * Exit a parse tree produced by `mdParser.mdItem`.
+	 * @param ctx the parse tree
+	 */
+	exitMdItem?: (ctx: MdItemContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `mdParser.title`.

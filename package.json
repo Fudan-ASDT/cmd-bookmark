@@ -6,7 +6,7 @@
   "scripts": {
     "cli": "ts-node src/cmd/index.ts",
     "test": "jest --coverage",
-    "antlr4ts": "antlr4ts -visitor src/grammar/md.g4"
+    "antlr4ts": "antlr4ts -visitor src/grammar/mdLexer.g4 src/grammar/mdParser.g4"
   },
   "repository": {
     "type": "git",

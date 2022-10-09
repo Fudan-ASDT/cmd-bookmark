@@ -17,7 +17,7 @@ export class ANTLR4Visitor implements mdParserVisitor<void> {
   }
 
   visitTitle(ctx: TitleContext) {
-    let level = ctx.MD_TITLE_TAG.length;
+    let level = ctx.MD_TITLE_TAG().text.length;
     let child = ctx.getChild(2) as StringContext;
     let content = child.text;
     let hdr = new Markdown.Header(level, content, new Object);

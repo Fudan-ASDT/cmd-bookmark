@@ -1145,7 +1145,6 @@ export class LinkContext extends ParserRuleContext {
 	// @Override
 	public accept<Result>(visitor: mdParserVisitor<Result>): Result {
 		if (visitor.visitLink) {
-      console.log("??????????")
 			return visitor.visitLink(this);
 		} else {
 			return visitor.visitChildren(this);

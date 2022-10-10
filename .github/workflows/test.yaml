@@ -1,0 +1,23 @@
+name: CI test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - 
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      -
+        run: npm install
+      -
+        run: npm run test

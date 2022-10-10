@@ -5,8 +5,7 @@
 ```shell
 # use nvm to install node and npm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-nvm install 18
-nvm use 18
+nvm use
 
 # check installation
 node -v

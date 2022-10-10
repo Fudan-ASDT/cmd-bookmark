@@ -6,8 +6,8 @@ export interface Serializer<T> {
 }
 
 /**
- * object implements Appender would have ability to send output to somewhere
+ * object implements Appender would have ability to write md files
  */
-export interface Appender<T> {
+export interface MdAppender<T> {
   output(s: Serializer<T>): void
 }

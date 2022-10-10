@@ -4,22 +4,23 @@ import { Stack } from "@/util/ds";
 import { Converter } from "../converter";
 
 
-export class Service implements Converter<Array<Markdown.Element>, BookMark.Unit> {
+export class Service implements Converter<Markdown.MarkdownDoc, BookMark.Unit> {
   constructor() {
   }
 
-  fromSrc(src: Markdown.Element[]): BookMark.Unit {
-    if (src.length == 0 && src[0] !instanceof Markdown.Header) {
+  fromSrc(src: Markdown.MarkdownDoc): BookMark.Unit {
+    let elems = src.elems;
+    if (elems.length == 0 && elems[0] !instanceof Markdown.Header) {
       throw new MarkdownSyntaxError("No content in bmk file");
     }
 
     // init level_unit_map, push the first element to stack
-    let first_elem = src[0] as Markdown.Header;
+    let first_elem = elems[0] as Markdown.Header;
     let first_data = new BookMark.UnitData(first_elem.level, first_elem.content, new Array, first_elem.appendix);
     let first_unit = new BookMark.Unit(first_data, new Array);
     let level_unit_map = new Stack<BookMark.Unit>([first_unit]);
 
-    src.slice(1).forEach(elem => {
+    elems.slice(1).forEach(elem => {
       console.log(elem);
       if (level_unit_map.length == 0) {
         throw new MarkdownSyntaxError("Unexpected error: empty bmk file");
@@ -55,7 +56,7 @@ export class Service implements Converter<Array<Markdown.Element>, BookMark.Unit
     return level_unit_map.get(0);
   }
 
-  fromDst(dst: BookMark.Unit): Markdown.Element[] {
+  fromDst(dst: BookMark.Unit): Markdown.MarkdownDoc {
     let elems = new Array<Markdown.Element>;
     // root Header
     let header = new Markdown.Header(dst.data.level, dst.data.label, dst.data.appendix);
@@ -68,9 +69,9 @@ export class Service implements Converter<Array<Markdown.Element>, BookMark.Unit
     // children Header
     dst.children.forEach(child => {
       let childElems = this.fromDst(child);
-      elems.push(...childElems);
+      elems.push(...childElems.elems);
     });
-    return elems;
+    return new Markdown.MarkdownDoc(elems);
   }
 
 

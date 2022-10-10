@@ -8,18 +8,18 @@ import { Service } from "./converter/antlr4/service";
 import { ANTLR4Visitor } from "./converter/antlr4/visitor";
 
 export class Generator {
-  static makeMdElemsFromFile(file_path: string): Markdown.Element[] {
+  static makeMdFromFile(file_path: string): Markdown.MarkdownDoc {
     let content = FileUtil.readFile(file_path);
-    return this.makeMdElemsFromContent(content);
+    return this.makeMdFromContent(content);
   }
 
   static makeBookMarkFromFile(file_path: string): BookMark.Unit {
-    let elems = this.makeMdElemsFromFile(file_path);
+    let elems = this.makeMdFromFile(file_path);
     let converter = new Service();
     return converter.fromSrc(elems);
   }
 
-  static makeMdElemsFromContent(content: string): Markdown.Element[] {
+  static makeMdFromContent(content: string): Markdown.MarkdownDoc {
     let inputStream = CharStreams.fromString(content);
     let lexer = new mdLexer(inputStream);
     let tokenStream = new CommonTokenStream(lexer);
@@ -27,11 +27,11 @@ export class Generator {
     let tree = parser.md();
     let visitor = new ANTLR4Visitor();
     tree.accept(visitor);
-    return visitor.elems;
+    return new Markdown.MarkdownDoc(visitor.elems);
   }
 
   static makeBookMarkFromContent(content: string): BookMark.Unit {
-    let elems = this.makeMdElemsFromContent(content);
+    let elems = this.makeMdFromContent(content);
     let converter = new Service();
     return converter.fromSrc(elems);
   }

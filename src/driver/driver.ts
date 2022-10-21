@@ -5,36 +5,40 @@ import { readFileSync } from "fs";
 import {error_handle} from "@/error_handle/error_handle"
 import {close_callback} from "@/closecallback/closecallback"
 import {cmd} from "@/cmd/cmd"
+import { welcome } from "@/welcome/welcome";
 export class driver{
     private lazy:boolean;
     private errorhandler:error_handle.default_error_handler;
+    private closecallback:close_callback.closecallback;
+    private welcome:welcome.welcome;
     constructor(){
         this.lazy=false;
         this.errorhandler=new error_handle.default_error_handler();
+        this.closecallback=new close_callback.defaultcallback();
+        this.welcome=new welcome.defaultwelcome();
     }
-    public welcomeMessages(){
+    private welcomeMessages(){
         console.log("**********************************************");
     }
   
-    public getInitialPath():string{
+    private getInitialPath():string{
         let argument:string[]=process.argv.splice(2);
         let path:string=argument[0];
         return path;
     }
   
-    public loadContent():string{
+    private loadContent():string{
         let content = readFileSync(this.getInitialPath(), "utf-8");
         return content;
     }
   
-    public showContent(c:string){
+    private showContent(c:string){
         console.log("current contents");
         console.log(c);
     }
-    public wait4Input(){
+    private wait4Input(){
         let commands:Stack<cmd.Command>;
         let commandFactory=new cmd.CommandFactory();
-        let closecallback=new close_callback.defaultcallback();
         var readline = require('readline');
         var  rl = readline.createInterface({
             input:process.stdin,
@@ -65,7 +69,7 @@ export class driver{
         });
       
         rl.on("close", function(){
-            closecallback.close();
+            this.closecallback.close();
         });
     }
     public run() {
@@ -78,6 +82,12 @@ export class driver{
         this.lazy=true;
     }
     public seterrorhandler(eh:error_handle.errorhandler):void{
+
+    }
+    public setclosecallback(cb:close_callback.closecallback){
+
+    }
+    public setwelcome(wc:welcome.welcome){
         
     }
 }

@@ -1,5 +1,5 @@
 export namespace close_callback{
-    abstract class closecallback{
+    export abstract class closecallback{
         constructor(){}
         public close(){}
     }

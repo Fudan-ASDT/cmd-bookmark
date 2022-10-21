@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "cli": "ts-node src/cmd/index.ts",
+    "cli": "ts-node src/main/main.ts test/md/test.md",
     "test": "jest --coverage",
     "antlr4ts": "antlr4ts -visitor src/grammar/mdLexer.g4 src/grammar/mdParser.g4",
     "lint": "tslint 'src/**/*.ts' 'test/**/*.test.ts'"
@@ -21,7 +21,8 @@
   "homepage": "https://github.com/Fudan-ASDT/cmd-bookmark#readme",
   "dependencies": {
     "antlr4ts": "^0.5.0-alpha.4",
-    "fs": "^0.0.1-security"
+    "fs": "^0.0.1-security",
+    "scanf": "^1.1.2"
   },
   "devDependencies": {
     "@types/jest": "^29.1.1",

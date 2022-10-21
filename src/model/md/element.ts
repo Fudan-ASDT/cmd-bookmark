@@ -42,4 +42,4 @@ export namespace Markdown {
       return `[${this.label}](${this.url})`;
     }
   }
-}
+}//end of namespace markdown

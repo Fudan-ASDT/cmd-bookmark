@@ -4,9 +4,8 @@ import { ActionTransition } from "antlr4ts/atn/ActionTransition";
 import { readFileSync } from "fs";
 import {error_handle} from "@/error_handle/error_handle"
 import {close_callback} from "@/closecallback/closecallback"
-
-
-
+import { Markdown } from "@/model/md/element";
+import {Generator} from "@/service/generator"
 //add-title
 //add-bookmark
 //delete-title
@@ -58,9 +57,10 @@ export namespace cmd{
             commandAndArguments.splice(0, 1);
             console.debug("after splice : "+commandAndArguments);
             if(commandAndArguments.length!=0){
+              let that=this;
               commandAndArguments.forEach(function(elem){
                 console.debug("pushing argument "+elem);
-                this._arguments;
+                that._arguments;
               });
             }
             //this.parseArguments(commandAndArguments[1]);

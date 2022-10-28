@@ -44,6 +44,7 @@ export class driver{
             input:process.stdin,
             output:process.stdout
         });
+        let that=this;
         console.log("input your command : ");
         rl.on("line",function(userCommand){
             let tmp:string=userCommand;
@@ -55,13 +56,12 @@ export class driver{
                 //let command:Command=CommandFactory::create(userCommand);
                 if(userCommand!=""){
                   let command=commandFactory.create(userCommand);
-                  //只有redo,undo需要的才會push
                   if(command!=null){
                     command.push(commands);
                     command.action(commands);
                   }else{
-                    this.errorhandler.setErrorcode(error_handle.errorcode.illegalcommand);
-                    this.errorhandler.handle();
+                    that.errorhandler.setErrorcode(error_handle.errorcode.illegalcommand);
+                    that.errorhandler.handle();
                   }
                 }
               }
@@ -88,6 +88,6 @@ export class driver{
 
     }
     public setwelcome(wc:welcome.welcome){
-        
+
     }
 }

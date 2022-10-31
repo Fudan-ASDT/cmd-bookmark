@@ -2,7 +2,7 @@ import { BookMark } from "@/model/bookmark/bookmark";
 import { Markdown } from "@/model/md/element";
 import { Stack } from "@/util/ds";
 import { Converter } from "../converter";
-
+import { MarkdownSyntaxError } from "@/util/exception";
 
 export class Service implements Converter<Markdown.MarkdownDoc, BookMark.Unit> {
   constructor() {

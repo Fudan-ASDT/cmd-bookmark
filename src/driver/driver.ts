@@ -1,12 +1,19 @@
 require("module-alias/register")
 import { Stack } from "@/util/ds";
 import { ActionTransition } from "antlr4ts/atn/ActionTransition";
-import { readFileSync } from "fs";
+import { readFile, readFileSync } from "fs";
 import {error_handle} from "@/error_handle/error_handle"
 import {close_callback} from "@/closecallback/closecallback"
 import {cmd} from "@/cmd/cmd"
 import { welcome } from "@/welcome/welcome";
+import { FileUtil } from "@/util/file_util";
+import { BookMark } from "@/model/bookmark/bookmark";
+import { Markdown } from "@/model/md/element";
+import { Generator } from "@/service/generator";
 export class driver{
+    private unit:BookMark.Unit;//workdir
+    private masterDir:BookMark.Unit;
+    private prevDir:BookMark.Unit;
     private lazy:boolean;
     private errorhandler:error_handle.default_error_handler;
     private closecallback:close_callback.closecallback;
@@ -37,8 +44,10 @@ export class driver{
         console.log(c);
     }
     private wait4Input(){
-        let commands:Stack<cmd.Command>;
-        let commandFactory=new cmd.CommandFactory();
+        let container:cmd.Command[]=new Array(1024);
+        let redoContainer:cmd.Command[]=new Array(1024);
+        let commands:Stack<cmd.Command>=new Stack(container);
+        let redoStack:Stack<cmd.Command>=new Stack(redoContainer);
         var readline = require('readline');
         var  rl = readline.createInterface({
             input:process.stdin,
@@ -55,10 +64,10 @@ export class driver{
               }else{
                 //let command:Command=CommandFactory::create(userCommand);
                 if(userCommand!=""){
-                  let command=commandFactory.create(userCommand);
+                  let command=cmd.CommandFactory.create(userCommand);
                   if(command!=null){
                     command.push(commands);
-                    command.action(commands);
+                    command.handle(commands,redoStack,that);
                   }else{
                     that.errorhandler.setErrorcode(error_handle.errorcode.illegalcommand);
                     that.errorhandler.handle();
@@ -74,12 +83,40 @@ export class driver{
     }
     public run() {
         this.welcomeMessages();
-        let content=this.loadContent();
-        this.showContent(content);
+        //todo 这个函数在没有这个路径的时候创建一个新的md，并放回undefined
+        let md = Generator.makeBookMarkFromFile("test/md/test.md");
+        //this.showContent(content);
+        //let doc=Generator.makeMdFromContent(content.s);
+        if(md==undefined){
+          md=new BookMark.Unit(null,null);
+        }
+        this.unit=md;
+        this.setMaster(md);
         this.wait4Input();
+    }
+    public getUnit():BookMark.Unit{
+      return this.unit;
+    }
+    public setUnit(unit:BookMark.Unit){
+      this.unit=unit;
+    }
+    public setMaster(master:BookMark.Unit){
+      this.masterDir=master;
+    }
+    public getMaster(){
+      return this.masterDir;
+    }
+    public getPrev(){
+      return this.prevDir;
+    }
+    public setPrev(prev:BookMark.Unit){
+      this.prevDir=prev;
     }
     public setlazy():void{
         this.lazy=true;
+    }
+    public setWorkDir(dir:BookMark.Unit){
+        this.unit=dir;
     }
     public seterrorhandler(eh:error_handle.errorhandler):void{
 

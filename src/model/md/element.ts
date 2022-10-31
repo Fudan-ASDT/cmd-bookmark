@@ -25,7 +25,7 @@ export namespace Markdown {
       public content: string,
       appendix: Object
     ) { super(appendix); }
-
+    
     serialize(): string {
       return `${"#".repeat(this.level)} ${this.content}`;
     }

@@ -7,6 +7,6 @@ import {close_callback} from "@/closecallback/closecallback"
 import { driver } from "@/driver/driver";
 function main(){
     let dv=new driver();
-    dv.run();
+    dv.run("real");
 }
 main();

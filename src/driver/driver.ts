@@ -11,6 +11,10 @@ import { BookMark } from "@/model/bookmark/bookmark";
 import { Markdown } from "@/model/md/element";
 import { Generator } from "@/service/generator";
 export class driver{
+    public container:cmd.Command[]=new Array(1024);
+    public redoContainer:cmd.Command[]=new Array(1024);
+    public commands:Stack<cmd.Command>=new Stack(this.container);
+    public redoStack:Stack<cmd.Command>=new Stack(this.redoContainer);
     private unit:BookMark.Unit;//workdir
     private masterDir:BookMark.Unit;
     private prevDir:BookMark.Unit;
@@ -18,6 +22,7 @@ export class driver{
     private errorhandler:error_handle.default_error_handler;
     private closecallback:close_callback.closecallback;
     private welcome:welcome.welcome;
+    private fileDir:string="";
     constructor(){
         this.lazy=false;
         this.errorhandler=new error_handle.default_error_handler();
@@ -43,56 +48,73 @@ export class driver{
         console.log("current contents");
         console.log(c);
     }
-    private wait4Input(){
-        let container:cmd.Command[]=new Array(1024);
-        let redoContainer:cmd.Command[]=new Array(1024);
-        let commands:Stack<cmd.Command>=new Stack(container);
-        let redoStack:Stack<cmd.Command>=new Stack(redoContainer);
-        var readline = require('readline');
-        var  rl = readline.createInterface({
-            input:process.stdin,
-            output:process.stdout
-        });
-        let that=this;
-        console.log("input your command : ");
-        rl.on("line",function(userCommand){
-            let tmp:string=userCommand;
-            if(tmp.length!=0){
-              console.debug("command is "+userCommand);
-              if(userCommand=="quit"){
-                rl.close();
-              }else{
-                //let command:Command=CommandFactory::create(userCommand);
-                if(userCommand!=""){
-                  let command=cmd.CommandFactory.create(userCommand);
-                  if(command!=null){
-                    command.push(commands);
-                    command.handle(commands,redoStack,that);
-                  }else{
-                    that.errorhandler.setErrorcode(error_handle.errorcode.illegalcommand);
-                    that.errorhandler.handle();
-                  }
+
+    private wait4InputImpl(){
+      var readline = require('readline');
+      var  rl = readline.createInterface({
+          input:process.stdin,
+          output:process.stdout
+      });
+      let that=this;
+      console.log("input your command : ");
+      rl.on("line",function(userCommand){
+          let tmp:string=userCommand;
+          if(tmp.length!=0){
+            console.debug("command is "+userCommand);
+            if(userCommand=="quit"){
+              rl.close();
+            }else{
+              //let command:Command=CommandFactory::create(userCommand);
+              if(userCommand!=""){
+                let command=cmd.CommandFactory.create(userCommand);
+                if(command!=null){
+                  command.push(that.commands);
+                  command.handle(that);
+                }else{
+                  that.errorhandler.setErrorcode(error_handle.errorcode.illegalcommand);
+                  that.errorhandler.handle();
                 }
               }
             }
-        });
+          }
+      });
       
-        rl.on("close", function(){
-            this.closecallback.close();
-        });
+      rl.on("close", function(){
+          that.closecallback.close(that);
+      });
     }
-    public run() {
-        this.welcomeMessages();
-        //todo 这个函数在没有这个路径的时候创建一个新的md，并放回undefined
-        let md = Generator.makeBookMarkFromFile("test/md/test.md");
-        //this.showContent(content);
-        //let doc=Generator.makeMdFromContent(content.s);
-        if(md==undefined){
-          md=new BookMark.Unit(null,null);
+    private wait4InputTest(){
+      let result=new Array();
+      let cmds=this.mock();
+      for(let idx=0;idx<cmds.length;idx++){
+          let command=cmd.CommandFactory.create(cmds[idx]);
+          result.push(command);
+      }
+      return result;
+    } 
+    protected mock(){
+      return new Array();
+    }
+    private wait4Input(runMode:string){
+        if(runMode=="real")
+        return this.wait4InputImpl();
+        else if(runMode=="test")
+        return this.wait4InputTest();
+    }
+    public run(mode:string) {
+        if(mode=="resl"){
+          this.welcomeMessages();
+          //todo 这个函数在没有这个路径的时候创建一个新的md，并放回undefined
+          let dir=this.getInitialPath();
+          let md = Generator.makeBookMarkFromFile(dir);
+          if(md==undefined){
+            md=new BookMark.Unit(null,null);
+          }
+          this.unit=md;
+          this.setMaster(md);
+          this.setFiliDir(dir);
         }
-        this.unit=md;
-        this.setMaster(md);
-        this.wait4Input();
+        return this.wait4Input(mode);
     }
     public getUnit():BookMark.Unit{
       return this.unit;
@@ -126,5 +148,11 @@ export class driver{
     }
     public setwelcome(wc:welcome.welcome){
 
+    }
+    public setFiliDir(dir:string){
+      this.fileDir=dir;
+    }
+    public getFileDir(){
+      return this.fileDir;
     }
 }

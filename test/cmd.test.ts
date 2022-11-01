@@ -2,7 +2,7 @@ import { cmd } from '@/cmd/cmd';
 import{BookMark} from '@/model/bookmark/bookmark'
 import{driver} from '@/driver/driver'
 import{Stack} from '@/util/ds'
-
+import {Generator} from '@/service/generator'
 function setupdv(){
   let data=new BookMark.UnitData(1,"test-unit",new Array<BookMark.Item>,null);
   let unit:BookMark.Unit=new BookMark.Unit(data,new Array<BookMark.Unit>);
@@ -12,88 +12,114 @@ function setupdv(){
   return dv;
 }
 
-function setupcommands(){
-  let container:cmd.Command[]=new Array(1024);
-  let commands:Stack<cmd.Command>=new Stack(container);
-  return commands;
-}
-
-function setupredo(){
-  let redoContainer:cmd.Command[]=new Array(1024);
-  let redoStack:Stack<cmd.Command>=new Stack(redoContainer);
-  return redoStack;
-}
 
 test("cmd add-title", () => {
   let dv=setupdv();
-  let commands=setupcommands();
-  let redoStack=setupredo();
   let add_titlle=cmd.CommandFactory.create("add-title"+" "+"666");
-  add_titlle.handle(commands,redoStack,dv);
+  add_titlle.handle(dv);
   expect(dv.getUnit().children[0].data.label).toEqual("666");
 })
 test("cmd delete-title", () => {
   let dv=setupdv();
-  let commands=setupcommands();
-  let redoStack=setupredo();
   let add_titlle=cmd.CommandFactory.create("add-title"+" "+"666");
-  add_titlle.handle(commands,redoStack,dv);
+  add_titlle.handle(dv);
   let delete_titlle=cmd.CommandFactory.create("delete-title"+" "+"test-unit");
-  delete_titlle.handle(commands,redoStack,dv);
+  delete_titlle.handle(dv);
   expect(dv.getUnit().data.label).toEqual("test-unit");
   let delete_titlle2=cmd.CommandFactory.create("delete-title"+" "+"666");
-  delete_titlle2.handle(commands,redoStack,dv);
+  delete_titlle2.handle(dv);
   expect(dv.getUnit().children.length).toEqual(0);
 })
 test("cmd undo redo", () => {
   let dv=setupdv();
-  let commands=setupcommands();
-  let redoStack=setupredo();
   let add_titlle=cmd.CommandFactory.create("add-title"+" "+"666");
-  add_titlle.handle(commands,redoStack,dv);
+  add_titlle.handle(dv);
   expect(dv.getUnit().children[0].data.label).toEqual("666");
-  commands.push(add_titlle);
+  dv.commands.push(add_titlle);
   let undo=cmd.CommandFactory.create("undo");
-  undo.handle(commands,redoStack,dv);
+  undo.handle(dv);
   expect(dv.getUnit().children.length).toEqual(0);
   let redo=cmd.CommandFactory.create("redo");
-  redo.handle(commands,redoStack,dv);
+  redo.handle(dv);
   expect(dv.getUnit().children[0].data.label).toEqual("666");
   let add_bookmark=cmd.CommandFactory.create("add-bookmark"+" "+"666@https://www.baidu.com");
-  add_bookmark.handle(commands,redoStack,dv);
+  add_bookmark.handle(dv);
   expect(dv.getUnit().data.items[0].label).toEqual("666");
-  commands.push(add_bookmark);
-  undo.handle(commands,redoStack,dv);
+  dv.commands.push(add_bookmark);
+  undo.handle(dv);
   expect(dv.getUnit().data.items.length).toEqual(0);
-  redo.handle(commands,redoStack,dv);
+  redo.handle(dv);
   expect(dv.getUnit().data.items[0].label).toEqual("666");
   expect(dv.getUnit().data.items[0].url.origin).toEqual("https://www.baidu.com");
 })
 
 test("cmd add-bookmark delete-bookmark", () => {
   let dv=setupdv();
-  let commands=setupcommands();
-  let redoStack=setupredo();
   let add_bookmark=cmd.CommandFactory.create("add-bookmark"+" "+"666@https://www.baidu.com");
-  add_bookmark.handle(commands,redoStack,dv);
+  add_bookmark.handle(dv);
   expect(dv.getUnit().data.items[0].label).toEqual("666");
   expect(dv.getUnit().data.items[0].url.origin).toEqual("https://www.baidu.com");
   let delete_bookmark=cmd.CommandFactory.create("delete-bookmark"+" "+"666");
-  delete_bookmark.handle(commands,redoStack,dv);
+  delete_bookmark.handle(dv);
   expect(dv.getUnit().data.items.length).toEqual(0);
 })
 
 test("cmd cd", () => {
   let dv=setupdv();
-  let commands=setupcommands();
-  let redoStack=setupredo();
   let add_titlle=cmd.CommandFactory.create("add-title"+" "+"666");
-  add_titlle.handle(commands,redoStack,dv);
+  add_titlle.handle(dv);
   expect(dv.getUnit().children[0].data.label).toEqual("666");
   let cd=cmd.CommandFactory.create("cd"+" "+"666");
-  cd.handle(commands,redoStack,dv);
+  cd.handle(dv);
   expect(dv.getUnit().data.label).toEqual("666");
   let cd_master=cmd.CommandFactory.create("cd"+" "+"master");
-  cd_master.handle(commands,redoStack,dv);
+  cd_master.handle(dv);
   expect(dv.getUnit().data.label).toEqual("test-unit");
+})
+
+
+test("cmd save", () => {
+  let dv=new driver();
+  let unit = Generator.makeBookMarkFromFile("test/md/testForCommandSave.md");
+  dv.setMaster(unit);
+  dv.setFiliDir("test/md/testForCommandSave.md");
+  dv.setUnit(unit);
+  let add_titlle=cmd.CommandFactory.create("add-title"+" "+"666");
+  add_titlle.handle(dv);
+  let add_bookmark=cmd.CommandFactory.create("add-bookmark"+" "+"777@https://www.baidu.com");
+  add_bookmark.handle(dv);
+  expect(dv.getUnit().data.items[dv.getUnit().data.items.length-1].label).toEqual("777");
+  expect(dv.getUnit().children[dv.getUnit().children.length-1].data.label).toEqual("666");
+  let save=cmd.CommandFactory.create("save");
+  save.handle(dv);
+  let afterSaveUnit = Generator.makeBookMarkFromFile("test/md/testForCommandSave.md");
+  expect(unit).toEqual(afterSaveUnit);
+})
+
+class testDriver extends driver{
+  protected mock(){
+    let result=new Array();
+    result.push("add-title 666");
+    result.push("delete-title 666");
+    result.push("add-bookmark 666@https://fanyi.baidu.com/");
+    result.push("delete-bookmark 666@https://fanyi.baidu.com/");
+    result.push("undo");
+    result.push("redo");
+    result.push("quit");
+    return result;
+  }
+}
+
+test("driver", () => {
+  let dv=new testDriver;
+  let cmds=dv.run("test");
+  let realCmds=new Array();
+  realCmds.push(cmd.CommandFactory.create("add-title 666"));
+  realCmds.push(cmd.CommandFactory.create("delete-title 666"));
+  realCmds.push(cmd.CommandFactory.create("add-bookmark 666@https://fanyi.baidu.com/"));
+  realCmds.push(cmd.CommandFactory.create("delete-bookmark 666@https://fanyi.baidu.com/"));
+  realCmds.push(cmd.CommandFactory.create("undo"));
+  realCmds.push(cmd.CommandFactory.create("redo"));
+  realCmds.push(cmd.CommandFactory.create("quit"));
+  expect(cmds).toEqual(realCmds);
 })

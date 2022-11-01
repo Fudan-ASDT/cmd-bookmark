@@ -8,6 +8,9 @@ import { Markdown } from "@/model/md/element";
 import {Generator} from "@/service/generator"
 import { BookMark } from "@/model/bookmark/bookmark";
 import { driver } from "@/driver/driver";
+import { Converter } from "@/service/converter/converter";
+import { Service } from "@/service/converter/antlr4/service"; 
+import{FileUtil} from "@/util/file_util"
 //add-title
 //add-bookmark
 //delete-title
@@ -31,7 +34,7 @@ export namespace cmd{
       }
       public visit(unit: BookMark.Unit): boolean {
           if(this.parentDir==unit.data.label){
-            let newdata:BookMark.UnitData=new BookMark.UnitData(unit.data.level+1,this.childrenDir,new Array<BookMark.Item>,null);
+            let newdata:BookMark.UnitData=new BookMark.UnitData(unit.data.level+1,this.childrenDir,new Array<BookMark.Item>,new Object());
             let newUnit:BookMark.Unit=new BookMark.Unit(newdata,new Array<BookMark.Unit>);
             console.debug("newdata"+newdata.serialize());
             console.debug("newUnit"+newUnit.serialize());
@@ -163,10 +166,10 @@ export namespace cmd{
             //this.parseArguments(commandAndArguments[1]);
           }
 
-          public action(commands:Stack<Command>,redoStack:Stack<Command>,dv:driver):void{console.debug("abstract command action");}
-          public handle(commands:Stack<Command>,redoStack:Stack<Command>,dv:driver):void{
+          public action(dv:driver):void{console.debug("abstract command action");}
+          public handle(dv:driver):void{
             console.debug(this.commandName+" action");
-            this.action(commands,redoStack,dv);
+            this.action(dv);
             console.debug(this.commandName+" action end");
           }
           public push(commands:Stack<Command>):void{
@@ -174,7 +177,7 @@ export namespace cmd{
             if(this.argumentError==false)
               commands.push(this);
           }
-          public undo(commands:Stack<Command>,redoStack:Stack<Command>,dv:driver){};
+          public undo(dv:driver){};
         }
 
   export class add_title extends Command{
@@ -185,15 +188,15 @@ export namespace cmd{
               this.argumentError=true;
             }
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
+          public action(dv:driver): void {
               if(this._arguments.length==1){
                   if(dv.getUnit().data!=null){
-                    let headData=new BookMark.UnitData(dv.getUnit().data.level+1,this._arguments[0],new Array<BookMark.Item>,null);
+                    let headData=new BookMark.UnitData(dv.getUnit().data.level+1,this._arguments[0],new Array<BookMark.Item>,new Object());
                     let head=new BookMark.Unit(headData,new Array<BookMark.Unit>);
                     dv.getUnit().children.push(head);
                   }else{
                     //md文件为空
-                    let headData=new BookMark.UnitData(dv.getUnit().data.level+1,this._arguments[0],new Array<BookMark.Item>,null);
+                    let headData=new BookMark.UnitData(dv.getUnit().data.level+1,this._arguments[0],new Array<BookMark.Item>,new Object());
                     dv.getUnit().data=headData;
                   }
               }else{
@@ -202,13 +205,13 @@ export namespace cmd{
                   //console.debug("after add-title : "+unit.serialize());
               }
           }
-          public undo(commands:Stack<Command>,redoStack:Stack<Command>,dv:driver){
+          public undo(dv:driver){
             if(this._arguments.length==1){
               let  del=CommandFactory.create("delete-title "+this._arguments[0]);
-              del.handle(commands,redoStack,dv);
+              del.handle(dv);
             }else{
               let del=CommandFactory.create("delete-title "+this._arguments[0]+" at "+this._arguments[2]);
-              del.handle(commands,redoStack,dv);
+              del.handle(dv);
             }
           }
         }
@@ -220,19 +223,19 @@ export namespace cmd{
               this.argumentError=true;
             }
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
+          public action(dv:driver): void {
               if(this._arguments.length==1){
                  let args=this._arguments[0].split("@");
                  let url=new URL(args[1]);
-                 let link:BookMark.Item=new BookMark.Item(args[0],url,null);
+                 let link:BookMark.Item=new BookMark.Item(args[0],url,new Object());
                  console.debug("link : "+link.serialize());
                  dv.getUnit().data.items.push(link);
                  console.debug(dv.getUnit().data.items);
               }
           }
-          public undo(commands: Stack<Command>, redoStack: Stack<Command>, dv: driver): void {
+          public undo(dv: driver): void {
             let del=CommandFactory.create("delete-bookmark"+" "+this._arguments[0].split("@")[0]);
-            del.handle(commands,redoStack,dv);
+            del.handle(dv);
           }
         }
 
@@ -243,7 +246,7 @@ export namespace cmd{
               this.argumentError=true;
             }
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
+          public action(dv:driver): void {
             if(this._arguments.length==1){
               console.debug("delete whole md");
               if(dv.getUnit().data.label==this._arguments[0]){
@@ -263,13 +266,13 @@ export namespace cmd{
               dv.getUnit().travel(dtv);
             }
           }
-          public undo(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
+          public undo(dv:driver): void {
             if(this._arguments.length==1){
               let add:Command=CommandFactory.create("add-title"+" "+this._arguments[0]);
-              add.handle(commands,redoStack,dv);
+              add.handle(dv);
             }else{
               let add:Command=CommandFactory.create("add-title "+" "+this._arguments[0]+" at "+this._arguments[2]);
-              add.handle(commands,redoStack,dv);
+              add.handle(dv);
             }
           }
         }
@@ -281,7 +284,7 @@ export namespace cmd{
               this.argumentError=true;
             }
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
+          public action(dv:driver): void {
             if(this._arguments.length==1){
               let idx=0;
               let that=this;
@@ -295,9 +298,9 @@ export namespace cmd{
               }
             }
           }
-          public undo(commands: Stack<Command>, redoStack: Stack<Command>, dv: driver): void {
+          public undo(dv: driver): void {
               let add=CommandFactory.create("add-bookmark"+" "+this._arguments[0]+"@"+this._arguments[1]);
-              add.handle(commands,redoStack,dv);
+              add.handle(dv);
           }
         }
 
@@ -308,8 +311,20 @@ export namespace cmd{
               this.argumentError=true;
             }
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
-            //console.debug("action open")
+          public action(dv:driver): void {
+            if(this._arguments.length==1){
+              let save=cmd.CommandFactory.create("save");
+              save.handle(dv);
+              let workDir = Generator.makeBookMarkFromFile(this._arguments[0]);
+              dv.setMaster(workDir);
+              dv.setUnit(workDir);
+              while(dv.commands.length!=0)
+              dv.commands.pop();
+              while(dv.redoStack.length!=0)
+              dv.redoStack.pop();
+              dv.setFiliDir(this._arguments[0]);
+              console.log("open : "+dv.getUnit().data.label+" success");
+            }
           }
           public push(commands:Stack<Command>):void{
 
@@ -320,8 +335,10 @@ export namespace cmd{
           public constructor(commandName:string){
             super(commandName);
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
-            //console.debug("action save")
+          public action(dv:driver): void {
+            let converter: Converter<Markdown.MarkdownDoc, BookMark.Unit> = new Service();
+            let md=converter.fromDst(dv.getMaster());
+            FileUtil.writeFile(dv.getFileDir(),md);
           }
           public push(commands:Stack<Command>):void{
             
@@ -332,20 +349,20 @@ export namespace cmd{
           public constructor(commandName:string){
             super(commandName);
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
+          public action(dv:driver): void {
             //console.debug("redo")
-            if(redoStack.length!=0){
-                let command=redoStack.pop();
+            if(dv.redoStack.length!=0){
+                let command=dv.redoStack.pop();
                 if(command!=undefined){
-                  commands.push(command);
-                  command.handle(commands,redoStack,dv);
+                  dv.commands.push(command);
+                  command.handle(dv);
                 }
             }
           }
           public push(commands:Stack<Command>):void{
 
           }
-          public undo(commands: Stack<Command>, redoStack: Stack<Command>, dv:driver): void {
+          public undo(dv:driver): void {
           }
         }
 
@@ -354,18 +371,18 @@ export namespace cmd{
           public constructor(commandName:string){
             super(commandName);
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
-              if(commands.length!=0){
-                let command:cmd.Command=commands.pop();
+          public action(dv:driver): void {
+              if(dv.commands.length!=0){
+                let command:cmd.Command=dv.commands.pop();
                 if(command!=undefined){
-                  redoStack.push(command);
-                  command.undo(commands,redoStack,dv);
+                  dv.redoStack.push(command);
+                  command.undo(dv);
                 }
               }
           }
           public push(commands:Stack<Command>):void{
           }
-          public undo(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
+          public undo(dv:driver): void {
           }
         }
 
@@ -373,7 +390,7 @@ export namespace cmd{
           public constructor(commandName:string){
             super(commandName);
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
+          public action(dv:driver): void {
             let visitor=new printTree_visitor();
             dv.getUnit().travel(visitor);
           }
@@ -385,9 +402,13 @@ export namespace cmd{
           public constructor(commandName:string){
             super(commandName);
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
+          public action(dv:driver): void {
              let visitor=new cd_visitor(this._arguments[0],dv);
              dv.getUnit().travel(visitor);
+             while(dv.commands.length!=0)
+             dv.commands.pop();
+             while(dv.redoStack.length!=0)
+             dv.redoStack.pop();
           }
           public push(commands:Stack<Command>):void{
             
@@ -397,7 +418,7 @@ export namespace cmd{
           public constructor(commandName:string){
             super(commandName);
           }
-          public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
+          public action(dv:driver): void {
              let visitor=new printTree_visitor();
              dv.getMaster().travel(visitor);
           }

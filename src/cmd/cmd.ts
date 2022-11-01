@@ -107,9 +107,13 @@ export namespace cmd{
       console.log(message+"└─"+"T."+unit.data.label);
       for(let idx=0;idx<unit.data.items.length;idx++){
           if(idx+1==unit.data.items.length){
+              if(unit.data.items[idx].appendix==true)
+              console.log(message+"  "+"└─"+"*L."+unit.data.items[idx].label);
               console.log(message+"  "+"└─"+"L."+unit.data.items[idx].label);
               continue;
-          } 
+          }
+          if(unit.data.items[idx].appendix==true) 
+          console.log(message+"  "+"├─"+"*L."+unit.data.items[idx].label);
           console.log(message+"  "+"├─"+"L."+unit.data.items[idx].label);
       }
       return true;
@@ -132,6 +136,8 @@ export namespace cmd{
               case "show-tree":return new show_tree(userCommand);
               case "cd":return new cd(userCommand);
               case "ls-tree":return new ls_tree(userCommand);
+              case "read-bookmark":return new read_bookmark(userCommand);
+              case "pwd":return new pwd(userCommand);
               default:
                 return null;
             }
@@ -323,6 +329,9 @@ export namespace cmd{
               while(dv.redoStack.length!=0)
               dv.redoStack.pop();
               dv.setFiliDir(this._arguments[0]);
+              dv.getUnit().data.items.forEach(function(elem:BookMark.Item){
+                elem.appendix=new Object();
+              });
               console.log("open : "+dv.getUnit().data.label+" success");
             }
           }
@@ -336,6 +345,9 @@ export namespace cmd{
             super(commandName);
           }
           public action(dv:driver): void {
+            dv.getUnit().data.items.forEach(function(elem:BookMark.Item){
+                elem.appendix=new Object();
+            });
             let converter: Converter<Markdown.MarkdownDoc, BookMark.Unit> = new Service();
             let md=converter.fromDst(dv.getMaster());
             FileUtil.writeFile(dv.getFileDir(),md);
@@ -426,6 +438,36 @@ export namespace cmd{
             
           }
         }
+        export class read_bookmark extends Command{
+          public constructor(commandName:string){
+            super(commandName);
+          }
+          public action(dv:driver): void {
+             if(this._arguments.length==1){
+                for(let idx=0;idx<this._arguments.length;idx++){
+                  if(dv.getUnit().data.items[idx].label==this._arguments[0]){
+                      dv.getUnit().data.items[idx].appendix=true;
+                      console.log("visit : "+dv.getUnit().data.items[idx].url.origin);
+                  }
+                }
+             }
+          }
+          public push(commands:Stack<Command>):void{
+            
+          }
+        }
+        export class pwd extends Command{
+          public constructor(commandName:string){
+            super(commandName);
+          }
+          public action(dv:driver): void {
+             console.log("work directory : "+dv.getUnit().data.label);
+          }
+          public push(commands:Stack<Command>):void{
+            
+          }
+        }
+
 }//end of namespace cmd
 
 

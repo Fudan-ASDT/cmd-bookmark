@@ -102,7 +102,7 @@ export class driver{
         return this.wait4InputTest();
     }
     public run(mode:string) {
-        if(mode=="resl"){
+        if(mode=="real"){
           this.welcomeMessages();
           //todo 这个函数在没有这个路径的时候创建一个新的md，并放回undefined
           let dir=this.getInitialPath();

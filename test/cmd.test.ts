@@ -96,6 +96,20 @@ test("cmd save", () => {
   expect(unit).toEqual(afterSaveUnit);
 })
 
+
+
+
+test("cmd read-bookmark", () => {
+  let dv=setupdv();
+  let add_bookmark=cmd.CommandFactory.create("add-bookmark"+" "+"666@https://www.baidu.com");
+  add_bookmark.handle(dv);
+  expect(dv.getUnit().data.items[0].label).toEqual("666");
+  let read=cmd.CommandFactory.create("read-bookmark"+" "+"666");
+  read.handle(dv);
+  expect(dv.getUnit().data.items[0].appendix).toEqual(true);
+})
+
+
 class testDriver extends driver{
   protected mock(){
     let result=new Array();
@@ -110,6 +124,7 @@ class testDriver extends driver{
   }
 }
 
+
 test("driver", () => {
   let dv=new testDriver;
   let cmds=dv.run("test");
@@ -123,3 +138,5 @@ test("driver", () => {
   realCmds.push(cmd.CommandFactory.create("quit"));
   expect(cmds).toEqual(realCmds);
 })
+
+

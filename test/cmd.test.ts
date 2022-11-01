@@ -82,3 +82,18 @@ test("cmd add-bookmark delete-bookmark", () => {
   delete_bookmark.handle(commands,redoStack,dv);
   expect(dv.getUnit().data.items.length).toEqual(0);
 })
+
+test("cmd cd", () => {
+  let dv=setupdv();
+  let commands=setupcommands();
+  let redoStack=setupredo();
+  let add_titlle=cmd.CommandFactory.create("add-title"+" "+"666");
+  add_titlle.handle(commands,redoStack,dv);
+  expect(dv.getUnit().children[0].data.label).toEqual("666");
+  let cd=cmd.CommandFactory.create("cd"+" "+"666");
+  cd.handle(commands,redoStack,dv);
+  expect(dv.getUnit().data.label).toEqual("666");
+  let cd_master=cmd.CommandFactory.create("cd"+" "+"master");
+  cd_master.handle(commands,redoStack,dv);
+  expect(dv.getUnit().data.label).toEqual("test-unit");
+})

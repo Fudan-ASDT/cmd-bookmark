@@ -21,13 +21,6 @@ import { driver } from "@/driver/driver";
 //ls-tree
 
 export namespace cmd{
-   class locFinder{
-      public static findDirectory(content:string,target:string){
-          return content.search(target);
-      }
-      
-   }
-
    class add_title_visitor extends BookMark.unitVisitor{
       private parentDir:string;
       private childrenDir:string;
@@ -103,7 +96,6 @@ export namespace cmd{
    }
 
    class printTree_visitor extends BookMark.unitVisitor{
-    private top:number=0;
     public visit(unit: BookMark.Unit): boolean {
       let message:String="";
       for(let idx=0;idx<unit.data.level;idx++){
@@ -112,15 +104,11 @@ export namespace cmd{
       console.log(message+"└─"+"T."+unit.data.label);
       for(let idx=0;idx<unit.data.items.length;idx++){
           if(idx+1==unit.data.items.length){
-            if(this.top!=0){
               console.log(message+"  "+"└─"+"L."+unit.data.items[idx].label);
               continue;
-            }
-          }
-          if(this.top!=0)  
-          console.log(message+"│ "+"├─"+"L."+unit.data.items[idx].label);
+          } 
+          console.log(message+"  "+"├─"+"L."+unit.data.items[idx].label);
       }
-      this.top++;
       return true;
     }
    };
@@ -259,7 +247,16 @@ export namespace cmd{
             if(this._arguments.length==1){
               console.debug("delete whole md");
               if(dv.getUnit().data.label==this._arguments[0]){
-                dv.setUnit(null);
+                console.log("can not delete working dir");
+              }else{
+                let that=this;
+                let idx=0;
+                dv.getUnit().children.forEach(function(elem:BookMark.Unit){
+                    if(elem.data.label==that._arguments[0]){
+                      dv.getUnit().children.splice(idx,1);
+                    }
+                    idx++;
+                });
               }
             }else{
               let dtv=new delete_title_visitor(this._arguments[0],this._arguments[2]);
@@ -287,17 +284,19 @@ export namespace cmd{
           public action(commands: Stack<Command>,redoStack:Stack<Command>,dv:driver): void {
             if(this._arguments.length==1){
               let idx=0;
-              dv.getUnit().data.items.forEach(function(elem:BookMark.Item){
-                    if(elem.label==this._arguments[0]){
-                      this._arguments.push(elem.url.origin);
-                      dv.getUnit().data.items.splice(idx,1);
-                    }
-                    idx++;
-              });
+              let that=this;
+              for(let idx=0;idx<dv.getUnit().data.items.length;idx++){
+                if(dv.getUnit().data.items[idx].label==that._arguments[0]){
+                  that._arguments.push(dv.getUnit().data.items[idx].url.origin);
+                  console.debug("delete bookmark : "+that._arguments[0]);
+                  dv.getUnit().data.items.splice(idx,1);
+                  return;
+                }
+              }
             }
           }
           public undo(commands: Stack<Command>, redoStack: Stack<Command>, dv: driver): void {
-              let add=CommandFactory.create("add-bookmark"+this._arguments[0]+"@"+this._arguments[1]);
+              let add=CommandFactory.create("add-bookmark"+" "+this._arguments[0]+"@"+this._arguments[1]);
               add.handle(commands,redoStack,dv);
           }
         }

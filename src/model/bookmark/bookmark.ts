@@ -7,16 +7,16 @@ export namespace BookMark {
       public label: string,
       public url: URL,
       public appendix: Object
-    ) {}
+    ) { }
 
     serialize(): string {
       return `${this.label} :-> ${this.url} (extra: ${JSON.stringify(this.appendix)})`;
     }
   }
 
-  export abstract class unitVisitor{
-    constructor(){}
-    public abstract visit(unit:Unit):boolean;
+  export abstract class UnitVisitor {
+    constructor() { }
+    public abstract visit(unit: Unit): boolean;
     //public abstract visitHeader(unit:Unit):boolean;
     //public abstract visitLink(unit:Unit):boolean;
   }
@@ -24,22 +24,22 @@ export namespace BookMark {
   /**
    * composite pattern
    */
- export class Unit implements Serializer<string> {
+  export class Unit implements Serializer<string> {
     constructor(
       public data: BookMark.UnitData,
       public children: Array<BookMark.Unit>
-    ) {}
-    private accept(visitor:unitVisitor){
-        //sconsole.debug("visiting "+this.data.label);
-        return visitor.visit(this);
+    ) { }
+    private accept(visitor: UnitVisitor) {
+      //sconsole.debug("visiting "+this.data.label);
+      return visitor.visit(this);
     }
-    public travel(visitor:unitVisitor):void{
-      let contin:boolean=this.accept(visitor);
-      if(contin){
-        this.children.forEach(function(unit:BookMark.Unit){
+    public travel(visitor: UnitVisitor): void {
+      let contin: boolean = this.accept(visitor);
+      if (contin) {
+        this.children.forEach(function (unit: BookMark.Unit) {
           unit.travel(visitor);
         });
-      }else{
+      } else {
         return;
       }
     }
@@ -69,7 +69,7 @@ export namespace BookMark {
       public label: string,
       public items: Array<BookMark.Item>,
       public appendix: Object
-    ) {}
+    ) { }
 
     serialize(): string {
       return this.serializeInner()

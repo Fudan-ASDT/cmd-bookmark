@@ -1,8 +1,11 @@
-export namespace welcome{
-    export abstract class welcome{
+export namespace Welcome{
+    
+    export abstract class Welcome{
         public sayhi(){}
     }
-    export class defaultwelcome extends welcome{
+
+
+    export class DefaultWelcome extends Welcome{
         public sayhi(): void {
             console.log("************************");
         }

@@ -37,16 +37,6 @@ export class Driver {
     return path;
   }
 
-  private loadContent(): string {
-    let content = readFileSync(this.getInitialPath(), "utf-8");
-    return content;
-  }
-
-  private showContent(c: string) {
-    console.log("current contents");
-    console.log(c);
-  }
-
   private wait4InputImpl() {
     var readline = require('readline');
     var rl = readline.createInterface({

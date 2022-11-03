@@ -63,12 +63,10 @@ export namespace CmdVisitor {
         public visit(unit: BookMark.Unit): boolean {
             if (this.toDir == this.dv.getMaster().data.label || this.toDir == "master") {
                 this.dv.setUnit(this.dv.getMaster());
-                console.log("current working dir : " + this.dv.getUnit().data.label);
                 return false;
             }
             if (unit.data.label == this.toDir) {
                 this.dv.setWorkDir(unit);
-                console.log("current working dir : " + unit.data.label);
                 return false;
             }
             return true;

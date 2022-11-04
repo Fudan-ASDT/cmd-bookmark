@@ -313,6 +313,9 @@ export namespace Cmd {
     }
 
     public action(dv: Driver): void {
+      if(dv.getUnit()==undefined){
+        return;
+      }
       dv.getUnit().data.items.forEach(function (elem: BookMark.Item) {
         elem.appendix = new Object();
       });

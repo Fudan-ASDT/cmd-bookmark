@@ -107,14 +107,14 @@ export class Driver {
   public run(mode: string) {
     if (mode == "real") {
       this.welcome.sayhi();
-      let dir = this.getInitialPath();
+      /*let dir = this.getInitialPath();
       let md = Generator.makeBookMarkFromFile(dir);
       if (md == undefined) {
         md = new BookMark.Unit(null, null);
       }
       this.unit = md;
       this.setMaster(md);
-      this.setFiliDir(dir);
+      this.setFiliDir(dir);*/
     }
     return this.wait4Input(mode);
   }

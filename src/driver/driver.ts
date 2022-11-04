@@ -2,15 +2,15 @@ require("module-alias/register")
 import { Stack } from "@/util/ds";
 import { ActionTransition } from "antlr4ts/atn/ActionTransition";
 import { readFile, readFileSync } from "fs";
-import { ErrorHandle } from "@/errorhandle/errorhandle"
-import { CloseCallback } from "@/closecallback/closecallback"
+import { ErrorHandle } from "@/util/errorhandle"
+import { CloseCallback } from "@/util/closecallback"
 import { Cmd } from "@/cmd/cmd"
-import { Welcome } from "@/welcome/welcome";
+import { Welcome } from "@/util/welcome";
 import { FileUtil } from "@/util/file_util";
 import { BookMark } from "@/model/bookmark/bookmark";
 import { Markdown } from "@/model/md/element";
 import { Generator } from "@/service/generator";
-import { Component } from "@/ComponentFactory/ComponentFactory";
+import { Component } from "@/service/ComponentFactory";
 export class Driver {
   public container: Cmd.Command[] = new Array(1024);
   public redoContainer: Cmd.Command[] = new Array(1024);
@@ -42,7 +42,7 @@ export class Driver {
     var rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: '>',
+      prompt: '> ',
       preserveCursor:true
     });
     let that = this;
@@ -58,7 +58,8 @@ export class Driver {
           if (userCommand != "") {
             let command = Cmd.CommandFactory.create(userCommand);
             if (command != null) {
-              /**for command like add-title...
+              /**
+               * for command like add-title...
                * will be push into stack,but undo,show-tree...
                * will not.
                */
@@ -87,7 +88,8 @@ export class Driver {
     }
     return result;
   }
-  /**for Driver test,TestDriver class should 
+  /**
+   * for Driver test,TestDriver class should 
    * extends Driver and override this method
    * to provide fake usercommands
    */

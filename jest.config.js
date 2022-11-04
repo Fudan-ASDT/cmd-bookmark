@@ -1,6 +1,8 @@
 module.exports = {
   coverageDirectory: 'coverage',
-  coveragePathIgnorePatterns: ['/src/grammar/'],
+  coveragePathIgnorePatterns: [
+    '/src/grammar/', '/src/util/closecallback.ts', '/src/cmd/'
+  ],
   preset: 'ts-jest',
   testEnvironment: 'node',
   testRegex: '(/test/.*|(\\.|/)(test|spec))\\.tsx?$',

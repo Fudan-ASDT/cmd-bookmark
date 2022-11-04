@@ -1,6 +1,6 @@
-import { ErrorHandle } from "@/errorhandle/errorhandle"
-import { CloseCallback } from "@/closecallback/closecallback"
-import { Welcome } from "@/welcome/welcome";
+import { ErrorHandle } from "@/util/errorhandle"
+import { CloseCallback } from "@/util/closecallback"
+import { Welcome } from "@/util/welcome";
 export class Component{
     constructor(){}
 

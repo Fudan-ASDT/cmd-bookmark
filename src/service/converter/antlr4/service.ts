@@ -21,7 +21,7 @@ export class Service implements Converter<Markdown.MarkdownDoc, BookMark.Unit> {
     let level_unit_map = new Stack<BookMark.Unit>([first_unit]);
 
     elems.slice(1).forEach(elem => {
-      console.log(elem);
+      //console.log(elem);
       if (level_unit_map.length == 0) {
         throw new MarkdownSyntaxError("Unexpected error: empty bmk file");
       }

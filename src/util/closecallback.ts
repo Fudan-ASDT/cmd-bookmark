@@ -11,6 +11,7 @@ export namespace CloseCallback {
         public close(dv: Driver): void {
             console.log("saving ... ");
             let save = Cmd.CommandFactory.create("save");
+            console.log("wcnm")
             save.handle(dv);
             console.log("exit");
             process.exit(0);

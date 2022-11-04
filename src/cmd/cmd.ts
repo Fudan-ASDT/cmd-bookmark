@@ -2,8 +2,8 @@ require("module-alias/register")
 import { Stack } from "@/util/ds";
 import { ActionTransition } from "antlr4ts/atn/ActionTransition";
 import { readFileSync, unlinkSync } from "fs";
-import { ErrorHandle } from "@/errorhandle/errorhandle"
-import { CloseCallback } from "@/closecallback/closecallback"
+import { ErrorHandle } from "@/util/errorhandle"
+import { CloseCallback } from "@/util/closecallback"
 import { Markdown } from "@/model/md/element";
 import { Generator } from "@/service/generator"
 import { BookMark } from "@/model/bookmark/bookmark";
@@ -11,8 +11,8 @@ import { Driver } from "@/driver/driver";
 import { Converter } from "@/service/converter/converter";
 import { Service } from "@/service/converter/antlr4/service";
 import { FileUtil } from "@/util/file_util"
-import { CmdVisitor } from "@/cmdvisitor/cmdvisitor";
-import { Welcome } from "@/welcome/welcome";
+import { CmdVisitor } from "@/visitor/cmdvisitor";
+import { Welcome } from "@/util/welcome";
 
 export namespace Cmd {
   export class CommandFactory {

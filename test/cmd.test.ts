@@ -3,6 +3,10 @@ import { BookMark } from '@/model/bookmark/bookmark'
 import { Driver } from '@/driver/driver'
 import { Stack } from '@/util/ds'
 import { Generator } from '@/service/generator'
+import { CloseCallback } from "@/util/closecallback"
+import { ErrorHandle } from "@/util/errorhandle"
+import { MarkdownSyntaxError } from "@/util/exception"
+import { Welcome } from "@/util/welcome"
 function setupdv() {
   let data = new BookMark.UnitData(1, "test-unit", new Array<BookMark.Item>, null);
   let unit: BookMark.Unit = new BookMark.Unit(data, new Array<BookMark.Unit>);
@@ -18,6 +22,9 @@ test("cmd add-title", () => {
   let add_titlle = Cmd.CommandFactory.create("add-title" + " " + "666");
   add_titlle.handle(dv);
   expect(dv.getUnit().children[0].data.label).toEqual("666");
+  let add_titlle2 = Cmd.CommandFactory.create("add-title" + " "+"777"+" at " + "666");
+  add_titlle2.handle(dv);
+  expect(dv.getUnit().children[0].children[0].data.label).toEqual("777");
 })
 test("cmd delete-title", () => {
   let dv = setupdv();
@@ -28,6 +35,11 @@ test("cmd delete-title", () => {
   expect(dv.getUnit().data.label).toEqual("test-unit");
   let delete_titlle2 = Cmd.CommandFactory.create("delete-title" + " " + "666");
   delete_titlle2.handle(dv);
+  expect(dv.getUnit().children.length).toEqual(0);
+  let add_titlle2 = Cmd.CommandFactory.create("add-title" + " " + "666");
+  add_titlle2.handle(dv);
+  let delete_titlle3 = Cmd.CommandFactory.create("delete-title"+" "+"666"+" at "+"test-unit");
+  delete_titlle3.handle(dv);
   expect(dv.getUnit().children.length).toEqual(0);
 })
 test("cmd undo redo", () => {
@@ -110,6 +122,8 @@ test("cmd read-bookmark", () => {
 })
 
 
+
+
 class TestDriver extends Driver {
   protected mock() {
     let result = new Array();
@@ -140,3 +154,18 @@ test("driver", () => {
 })
 
 
+
+test("errorhandle", () => {
+  let eh=new ErrorHandle.DefaultErrorHandler();
+  eh.setErrorcode(ErrorHandle.errorcode.illegalcommand);
+  eh.handle();
+})
+
+test("exception", () => {
+  let e=new MarkdownSyntaxError("666");
+})
+
+test("welcome", () => {
+  let e=new Welcome.DefaultWelcome();
+  e.sayhi();
+})
